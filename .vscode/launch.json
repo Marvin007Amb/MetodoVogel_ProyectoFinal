@@ -1,0 +1,24 @@
+js
+document.getElementById('calculate-button').addEventListener('click', async () => {
+	const input = readMatrix();
+	const validValues = [...input.costs.flat(), ...input.supply, ...input.demand];
+	if (validValues.some(value => !Number.isFinite(value) || value < 0)) {
+		validationMessage.textContent = 'Completa todos los campos con valores numericos iguales o mayores que cero.';
+		results.hidden = true;
+		emptyResult.hidden = false;
+		return;
+	}
+	validationMessage.textContent = '';
+	const params = new URLSearchParams({
+		costs: input.costs.flat().join(','),
+		supply: input.supply.join(','),
+		demand: input.demand.join(',')
+	});
+	try {
+		const response = await fetch('/api/vogel?' + params);
+		if (!response.ok) throw new Error();
+		showResults(await response.json());
+	} catch (error) {
+		validationMessage.textContent = 'No se pudo conectar con el servidor Java. Verifica que VogelServer este en ejecucion.';
+	}
+});

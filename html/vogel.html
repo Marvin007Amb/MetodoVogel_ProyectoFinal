@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="theme-color" content="#173831">
+	<title>SOLUCIÓN VOGEL| COSTO</title>
+	<style>
+		:root {
+			color-scheme: light;
+			--ink: #2f274d;
+			--muted: #6e7d76;
+			--line: #dce4de;
+			--paper: #f1f5f1;
+			--surface: #ffffff;
+			--forest: #231585;
+			--forest-soft: #1f2826;
+			--mint: #f4867a;
+			--coral: #df7159;
+			--pale-green: #f4edf4;
+			--shadow: 0 14px 38px rgba(23, 56, 49, .07);
+		}
+
+		* { box-sizing: border-box; }
+
+		body {
+			margin: 0;
+			background-color: var(--paper);
+			background-image: linear-gradient(rgba(23, 56, 49, .025) 1px, transparent 1px),
+				linear-gradient(90deg, rgba(23, 56, 49, .025) 1px, transparent 1px);
+			background-size: 28px 28px;
+			color: var(--ink);
+			font-family: "Segoe UI", Tahoma, sans-serif;
+			font-size: 14px;
+		}
+
+		button, input { font: inherit; }
+
+		.topbar {
+			min-height: 78px;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 20px;
+			padding: 14px clamp(20px, 5vw, 72px);
+			background: var(--forest);
+			color: #f8fbf7;
+		}
+
+		.brand { display: flex; align-items: center; gap: 13px; }
+
+		.brand-mark {
+			display: grid;
+			place-items: center;
+			width: 40px;
+			height: 40px;
+			border: 1px solid rgba(217, 244, 122, .55);
+			color: var(--mint);
+			font-family: Georgia, serif;
+			font-size: 21px;
+		}
+
+		.brand-name { font-family: Georgia, "Times New Roman", serif; font-size: 20px; }
+		.brand-caption { margin-top: 3px; color: #b7c8bd; font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; }
+
+		.topbar-note {
+			color: #c8d6cd;
+			font-size: 12px;
+			letter-spacing: .3px;
+		}
+
+		.app-shell {
+			width: min(1440px, 100%);
+			margin: 0 auto;
+			padding: 38px clamp(20px, 5vw, 72px) 64px;
+		}
+
+		.page-heading {
+			display: flex;
+			align-items: end;
+			justify-content: space-between;
+			gap: 24px;
+			margin-bottom: 26px;
+			animation: rise-in .45s ease-out both;
+		}
+
+		.eyebrow {
+			margin: 0 0 8px;
+			color: #826467;
+			font-size: 11px;
+			font-weight: 700;
+			letter-spacing: 1.6px;
+			text-transform: uppercase;
+		}
+
+		h1, h2, p { margin-top: 0; }
+		h1 { margin-bottom: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(29px, 4vw, 40px); font-weight: 400; }
+
+		.live-badge {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			padding: 8px 11px;
+			border: 1px solid #d1dfd4;
+			background: rgba(255, 255, 255, .7);
+			color: #466457;
+			font-size: 11px;
+			white-space: nowrap;
+		}
+
+		.live-dot { width: 7px; height: 7px; border-radius: 50%; background: #84aa50; }
+
+		.layout {
+			display: grid;
+			grid-template-columns: 232px minmax(0, 1fr);
+			align-items: start;
+			gap: 22px;
+		}
+
+		.panel {
+			border: 1px solid var(--line);
+			background: var(--surface);
+			box-shadow: var(--shadow);
+			animation: rise-in .5s ease-out both;
+		}
+
+		.settings { padding: 21px 19px; animation-delay: .06s; }
+		.section-kicker { margin: 0 0 18px; color: #728179; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }
+		.setting-row { padding: 15px 0; border-top: 1px solid #edf0ed; }
+		.setting-label { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 11px; font-weight: 600; }
+		.setting-label span:last-child { color: var(--muted); font-size: 11px; font-weight: 400; }
+
+		.stepper { display: grid; grid-template-columns: 38px 1fr 38px; height: 38px; border: 1px solid var(--line); }
+		.stepper button { border: 0; background: #f5f8f5; color: var(--forest); cursor: pointer; font-size: 19px; }
+		.stepper button:hover { background: var(--pale-green); }
+		.stepper input { width: 100%; min-width: 0; border: 0; border-right: 1px solid var(--line); border-left: 1px solid var(--line); outline: 0; text-align: center; font-weight: 700; }
+		.stepper input:focus { box-shadow: inset 0 0 0 2px #91a98f; }
+
+		.button-stack { display: grid; gap: 9px; margin-top: 17px; }
+		.button {
+			min-height: 42px;
+			padding: 10px 13px;
+			border: 1px solid transparent;
+			cursor: pointer;
+			font-weight: 650;
+			transition: background .16s ease, transform .16s ease;
+		}
+		.button:active { transform: translateY(1px); }
+		.button-primary { background: var(--forest); color: white; }
+		.button-primary:hover { background: var(--forest-soft); }
+		.button-secondary { border-color: var(--line); background: white; color: var(--ink); }
+		.button-secondary:hover { background: #f4f7f3; }
+		.button-text { padding: 8px 0; border: 0; background: transparent; color: #66776f; cursor: pointer; text-align: left; font-size: 12px; }
+		.button-text:hover { color: var(--coral); }
+
+		.workspace { min-width: 0; }
+		.matrix-panel { padding: 22px; animation-delay: .12s; }
+		.panel-heading { display: flex; justify-content: space-between; align-items: start; gap: 16px; margin-bottom: 17px; }
+		h2 { margin-bottom: 4px; font-family: Georgia, "Times New Roman", serif; font-size: 21px; font-weight: 400; }
+		.panel-subtitle { margin-bottom: 0; color: var(--muted); font-size: 12px; }
+		.dimension { color: #75827b; font-size: 11px; white-space: nowrap; }
+
+		.table-scroll { overflow-x: auto; border: 1px solid var(--line); }
+		table { width: 100%; border-collapse: collapse; }
+		.matrix { min-width: 610px; }
+		th, td { padding: 10px 11px; border-right: 1px solid #e7ece7; border-bottom: 1px solid #e7ece7; text-align: center; }
+		th:last-child, td:last-child { border-right: 0; }
+		tr:last-child th, tr:last-child td { border-bottom: 0; }
+		thead th { height: 43px; background: #f3f7f2; color: #52675b; font-size: 11px; font-weight: 700; }
+		th.row-heading { width: 76px; text-align: left; }
+		th.supply-heading, td.supply-cell { min-width: 92px; background: #f8faf7; }
+		th.demand-heading, td.demand-cell { background: #f3f7f2; font-weight: 700; }
+		.matrix input {
+			width: min(100%, 78px);
+			height: 34px;
+			border: 1px solid transparent;
+			border-radius: 0;
+			outline: none;
+			background: transparent;
+			color: var(--ink);
+			text-align: center;
+			font-variant-numeric: tabular-nums;
+		}
+		.matrix input:hover { border-color: #d8e2d8; background: white; }
+		.matrix input:focus { border-color: #829d88; background: white; box-shadow: 0 0 0 2px rgba(130, 157, 136, .15); }
+		.matrix input::placeholder { color: #b1bbb4; }
+		.row-name { color: #53685d; font-size: 12px; font-weight: 700; }
+		.table-footer th { text-align: left; }
+		.sum-value { color: #53685d; font-size: 11px; }
+
+		.actions-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 17px; }
+		.actions-row .button-primary { min-width: 160px; }
+		.validation { min-height: 18px; margin: 13px 0 0; color: #b24c3c; font-size: 12px; }
+
+		.results { margin-top: 22px; animation: rise-in .35s ease-out both; }
+		.result-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow); }
+		.stat { min-height: 97px; padding: 17px 19px; border-right: 1px solid var(--line); }
+		.stat:last-child { border-right: 0; }
+		.stat-label { display: block; margin-bottom: 10px; color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+		.stat-value { font-family: Georgia, "Times New Roman", serif; font-size: 25px; font-variant-numeric: tabular-nums; }
+		.balance-note { margin-top: 10px; padding: 11px 14px; border-left: 3px solid #8dad70; background: #edf4e9; color: #49633f; font-size: 12px; }
+
+		.allocation-panel { margin-top: 14px; padding: 20px 22px; }
+		.allocations { min-width: 500px; }
+		.allocations th { background: #f3f7f2; color: #62736a; font-size: 10px; letter-spacing: .8px; text-transform: uppercase; }
+		.allocations td { padding-top: 12px; padding-bottom: 12px; font-variant-numeric: tabular-nums; }
+		.allocations td:first-child { text-align: left; font-weight: 650; }
+		.route-tag { display: inline-block; min-width: 28px; padding: 4px 6px; background: #eef4e9; color: #3d6047; text-align: center; }
+		details { margin-top: 14px; border: 1px solid var(--line); background: white; }
+		summary { padding: 15px 18px; cursor: pointer; color: #40584b; font-weight: 650; }
+		.steps-list { display: grid; gap: 0; margin: 0; padding: 0 18px 8px; list-style: none; }
+		.steps-list li { display: grid; grid-template-columns: 38px 1fr; gap: 10px; padding: 12px 0; border-top: 1px solid #edf0ed; line-height: 1.5; }
+		.step-number { color: #81917f; font-size: 11px; font-weight: 700; }
+		.step-description { color: #42534a; font-size: 12px; }
+		.empty-result { padding: 22px; border: 1px dashed #cbd7cc; color: #718078; text-align: center; }
+		[hidden] { display: none !important; }
+
+		@keyframes rise-in {
+			from { opacity: 0; transform: translateY(9px); }
+			to { opacity: 1; transform: translateY(0); }
+		}
+
+		@media (max-width: 800px) {
+			.app-shell { padding-top: 28px; }
+			.layout { grid-template-columns: 1fr; }
+			.settings { display: grid; grid-template-columns: 1fr 1fr; column-gap: 18px; }
+			.settings .section-kicker, .button-stack { grid-column: 1 / -1; }
+			.setting-row { padding: 10px 0; }
+			.button-stack { grid-template-columns: 1fr 1fr 1fr; align-items: center; }
+			.button-text { text-align: center; }
+		}
+
+		@media (max-width: 540px) {
+			.topbar { min-height: 68px; padding: 12px 18px; }
+			.topbar-note { display: none; }
+			.app-shell { padding: 25px 15px 40px; }
+			.page-heading { align-items: start; flex-direction: column; gap: 13px; margin-bottom: 19px; }
+			.settings { padding: 16px; }
+			.matrix-panel { padding: 16px 13px; }
+			.panel-heading { align-items: start; flex-direction: column; gap: 6px; }
+			.actions-row { align-items: stretch; flex-direction: column; }
+			.actions-row .button-primary { width: 100%; }
+			.result-summary { grid-template-columns: 1fr; }
+			.stat { min-height: auto; padding: 13px 16px; border-right: 0; border-bottom: 1px solid var(--line); }
+			.stat:last-child { border-bottom: 0; }
+			.stat-label { display: inline-block; min-width: 130px; margin: 0; }
+			.stat-value { font-size: 20px; }
+			.allocation-panel { padding: 17px 13px; }
+			.button-stack { grid-template-columns: 1fr 1fr; }
+			.button-text { grid-column: 1 / -1; }
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			*, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+		}
+	</style>
+</head>
+<body>
+	<header class="topbar">
+		<div class="brand">
+			<div class="brand-mark" aria-hidden="true">V</div>
+			<div>
+				<div class="brand-name">Método Vogel</div>
+				<div class="brand-caption">Optimización de Costos</div>
+			</div>
+		</div>
+		<div class="topbar-note">Solución</div>
+	</header>
+
+	<main class="app-shell"
+		<div class="page-heading">
+			<div>
+				<p class="eyebrow">Investigacion de operaciones</p>
+				<h1>Optimización de Costos</h1>
+			</div>
+			<div class="live-badge"><span class="live-dot"></span>Calculadora lista</div>
+		</div>
+
+		<div class="layout">
+			<aside class="panel settings" aria-label="Configuracion del problema">
+				<p class="section-kicker">Ajustar</p>
+				<div class="setting-row">
+					<label class="setting-label" for="origin-count"><span>Áreas</span><span>Corte-Armado-Acabado</span></label>
+					<div class="stepper">
+						<button type="button" data-step="origin-count" data-change="-1" aria-label="Quitar origen">-</button>
+						<input id="origin-count" type="number" min="1" max="8" value="3" inputmode="numeric">
+						<button type="button" data-step="origin-count" data-change="1" aria-label="Agregar origen">+</button>
+					</div>
+				</div>
+				<div class="setting-row">
+					<label class="setting-label" for="destination-count"><span>Requerimiento</span><span>Tocador-Cabecera-closets</span></label>
+					<div class="stepper">
+						<button type="button" data-step="destination-count" data-change="-1" aria-label="Quitar destino">-</button>
+						<input id="destination-count" type="number" min="1" max="8" value="4" inputmode="numeric">
+						<button type="button" data-step="destination-count" data-change="1" aria-label="Agregar destino">+</button>
+					</div>
+				</div>
+				<div class="button-stack">
+					<button class="button button-secondary" id="sample-button" type="button">Cargar ejemplo</button>
+					<button class="button button-text" id="clear-button" type="button">Limpiar datos</button>
+				</div>
+			</aside>
+
+			<section class="workspace" aria-label="Datos y resultados">
+				<section class="panel matrix-panel">
+					<div class="panel-heading">
+						<div>
+							<p class="section-kicker">Datos de entrada</p>
+							<h2>Matriz de costos</h2>
+							<p class="panel-subtitle">Costos unitarios, Horas disponible y Horas requerida</p>
+						</div>
+						<span class="dimension" id="dimension-label">3 Área x 4 linea</span>
+					</div>
+
+					<div class="table-scroll" id="matrix-container"></div>
+					<p class="validation" id="validation-message" role="alert" aria-live="polite"></p>
+					<div class="actions-row">
+						<span class="panel-subtitle">La matriz puede incluir un destino u origen ficticio.</span>
+						<button class="button button-primary" id="calculate-button" type="button">Calcular Vogel</button>
+					</div>
+				</section>
+
+				<section class="results" id="results" hidden aria-live="polite">
+					<div class="result-summary" id="result-summary"></div>
+					<div class="balance-note" id="balance-note" hidden></div>
+					<section class="panel allocation-panel">
+						<div class="panel-heading">
+							<div>
+								<p class="section-kicker">Solucion inicial</p>
+								<h2>Asignaciones</h2>
+							</div>
+						</div>
+						<div class="table-scroll" id="allocation-container"></div>
+					</section>
+					<details>
+						<summary>Ver iteraciones del metodo</summary>
+						<ol class="steps-list" id="steps-list"></ol>
+					</details>
+				</section>
+				<div class="empty-result" id="empty-result">Los resultados del calculo apareceran aqui.</div>
+			</section>
+		</div>
+	</main>
+
+	<script>
+		(() => {
+			const sample = {
+				costs: [[19, 30, 50, 10], [70, 30, 40, 60], [40, 8, 70, 20]],
+				supply: [7, 9, 18],
+				demand: [5, 8, 7, 14]
+			};
+
+			const originCount = document.getElementById('origin-count');
+			const destinationCount = document.getElementById('destination-count');
+			const matrixContainer = document.getElementById('matrix-container');
+			const validationMessage = document.getElementById('validation-message');
+			const results = document.getElementById('results');
+			const emptyResult = document.getElementById('empty-result');
+
+			function readMatrix() {
+				const rows = Number(originCount.value);
+				const columns = Number(destinationCount.value);
+				const costs = [];
+				const supply = [];
+				const demand = [];
+
+				for (let row = 0; row < rows; row += 1) {
+					costs.push(Array.from({ length: columns }, (_, column) => {
+						const value = document.querySelector(`[data-cost="${row}-${column}"]`).value;
+						return value === '' ? NaN : Number(value);
+					}));
+					const value = document.querySelector(`[data-supply="${row}"]`).value;
+					supply.push(value === '' ? NaN : Number(value));
+				}
+
+				for (let column = 0; column < columns; column += 1) {
+					const value = document.querySelector(`[data-demand="${column}"]`).value;
+					demand.push(value === '' ? NaN : Number(value));
+				}
+
+				return { costs, supply, demand };
+			}
+
+			function buildMatrix(values = {}) {
+				const rows = Number(originCount.value);
+				const columns = Number(destinationCount.value);
+				const costs = values.costs || [];
+				const supply = values.supply || [];
+				const demand = values.demand || [];
+				let markup = '<table class="matrix"><thead><tr><th class="row-heading">Origen</th>';
+
+				for (let column = 0; column < columns; column += 1) {
+					markup += `<th scope="col">D${column + 1}</th>`;
+				}
+				markup += '<th class="supply-heading" scope="col">Oferta</th></tr></thead><tbody>';
+
+				for (let row = 0; row < rows; row += 1) {
+					markup += `<tr><th class="row-name" scope="row">O${row + 1}</th>`;
+					for (let column = 0; column < columns; column += 1) {
+						const value = costs[row] && costs[row][column] !== undefined ? costs[row][column] : '';
+						markup += `<td><input type="number" min="0" step="any" aria-label="Costo O${row + 1} a D${column + 1}" data-cost="${row}-${column}" value="${value}" placeholder="0"></td>`;
+					}
+					const supplyValue = supply[row] !== undefined ? supply[row] : '';
+					markup += `<td class="supply-cell"><input type="number" min="0" step="any" aria-label="Oferta O${row + 1}" data-supply="${row}" value="${supplyValue}" placeholder="0"></td></tr>`;
+				}
+
+				markup += '<tr class="table-footer"><th class="demand-heading" scope="row">Demanda</th>';
+				for (let column = 0; column < columns; column += 1) {
+					const demandValue = demand[column] !== undefined ? demand[column] : '';
+					markup += `<td class="demand-cell"><input type="number" min="0" step="any" aria-label="Demanda D${column + 1}" data-demand="${column}" value="${demandValue}" placeholder="0"></td>`;
+				}
+				markup += '<td class="demand-cell"><span class="sum-value">Total</span></td></tr></tbody></table>';
+				matrixContainer.innerHTML = markup;
+				document.getElementById('dimension-label').textContent = `${rows} origenes x ${columns} destinos`;
+			}
+
+			function updateDimensions() {
+				const current = readMatrix();
+				const parsedRows = Number(originCount.value);
+				const parsedColumns = Number(destinationCount.value);
+				const rows = Number.isInteger(parsedRows) ? Math.min(8, Math.max(1, parsedRows)) : 1;
+				const columns = Number.isInteger(parsedColumns) ? Math.min(8, Math.max(1, parsedColumns)) : 1;
+				originCount.value = rows;
+				destinationCount.value = columns;
+				buildMatrix(current);
+				clearResults();
+			}
+
+			function clearResults() {
+				results.hidden = true;
+				emptyResult.hidden = false;
+				validationMessage.textContent = '';
+			}
+
+			function formatNumber(value) {
+				return new Intl.NumberFormat('es-MX', { maximumFractionDigits: 2 }).format(value);
+			}
+
+			function calculateVogel(input) {
+				let costs = input.costs.map(row => row.slice());
+				let supply = input.supply.slice();
+				let demand = input.demand.slice();
+				let rows = supply.length;
+				let columns = demand.length;
+				let addedDummy = '';
+				const totalSupply = supply.reduce((sum, value) => sum + value, 0);
+				const totalDemand = demand.reduce((sum, value) => sum + value, 0);
+
+				if (Math.abs(totalSupply - totalDemand) > 1e-9) {
+					if (totalSupply > totalDemand) {
+						const difference = totalSupply - totalDemand;
+						costs = costs.map(row => [...row, 0]);
+						demand.push(difference);
+						columns += 1;
+						addedDummy = `Se agrego el destino ficticio D${columns} con demanda ${formatNumber(difference)} y costo cero.`;
+					} else {
+						const difference = totalDemand - totalSupply;
+						costs.push(Array(columns).fill(0));
+						supply.push(difference);
+						rows += 1;
+						addedDummy = `Se agrego el origen ficticio O${rows} con oferta ${formatNumber(difference)} y costo cero.`;
+					}
+				}
+
+				const allocation = Array.from({ length: rows }, () => Array(columns).fill(0));
+				const steps = [];
+				let iteration = 1;
+
+				while (supply.some(value => value > 1e-9) && demand.some(value => value > 1e-9)) {
+					const rowPenalties = Array(rows).fill(-1);
+					const columnPenalties = Array(columns).fill(-1);
+
+					for (let row = 0; row < rows; row += 1) {
+						if (supply[row] <= 1e-9) continue;
+						const active = costs[row].filter((_, column) => demand[column] > 1e-9).sort((a, b) => a - b);
+						if (active.length === 1) rowPenalties[row] = active[0];
+						if (active.length >= 2) rowPenalties[row] = active[1] - active[0];
+					}
+
+					for (let column = 0; column < columns; column += 1) {
+						if (demand[column] <= 1e-9) continue;
+						const active = costs.map((row, index) => supply[index] > 1e-9 ? row[column] : null)
+							.filter(value => value !== null).sort((a, b) => a - b);
+						if (active.length === 1) columnPenalties[column] = active[0];
+						if (active.length >= 2) columnPenalties[column] = active[1] - active[0];
+					}
+
+					let selectedType = 'fila';
+					let selectedIndex = rowPenalties.indexOf(Math.max(...rowPenalties));
+					const maxRowPenalty = rowPenalties[selectedIndex];
+					const maxColumnPenalty = Math.max(...columnPenalties);
+					if (maxColumnPenalty > maxRowPenalty) {
+						selectedType = 'columna';
+						selectedIndex = columnPenalties.indexOf(maxColumnPenalty);
+					}
+
+					let selectedRow = selectedType === 'fila' ? selectedIndex : -1;
+					let selectedColumn = selectedType === 'columna' ? selectedIndex : -1;
+					if (selectedType === 'fila') {
+						for (let column = 0; column < columns; column += 1) {
+							if (demand[column] > 1e-9 && (selectedColumn === -1 || costs[selectedRow][column] < costs[selectedRow][selectedColumn])) selectedColumn = column;
+						}
+					} else {
+						for (let row = 0; row < rows; row += 1) {
+							if (supply[row] > 1e-9 && (selectedRow === -1 || costs[row][selectedColumn] < costs[selectedRow][selectedColumn])) selectedRow = row;
+						}
+					}
+
+					const quantity = Math.min(supply[selectedRow], demand[selectedColumn]);
+					allocation[selectedRow][selectedColumn] += quantity;
+					steps.push({
+						iteration,
+						type: selectedType,
+						selected: selectedIndex + 1,
+						penalty: selectedType === 'fila' ? maxRowPenalty : maxColumnPenalty,
+						row: selectedRow,
+						column: selectedColumn,
+						quantity,
+						cost: costs[selectedRow][selectedColumn]
+					});
+					supply[selectedRow] = Math.max(0, supply[selectedRow] - quantity);
+					demand[selectedColumn] = Math.max(0, demand[selectedColumn] - quantity);
+					iteration += 1;
+				}
+
+				return { allocation, costs, rows, columns, steps, addedDummy };
+			}
+
+			function showResults(solution) {
+				const { allocation, costs, rows, columns, steps, addedDummy } = solution;
+				let totalCost = 0;
+				let assigned = 0;
+				const allocationRows = [];
+
+				for (let row = 0; row < rows; row += 1) {
+					for (let column = 0; column < columns; column += 1) {
+						const quantity = allocation[row][column];
+						if (quantity <= 1e-9) continue;
+						const cost = quantity * costs[row][column];
+						totalCost += cost;
+						assigned += 1;
+						allocationRows.push(`<tr><td><span class="route-tag">O${row + 1}</span> a <span class="route-tag">D${column + 1}</span></td><td>${formatNumber(quantity)}</td><td>${formatNumber(costs[row][column])}</td><td>${formatNumber(cost)}</td></tr>`);
+					}
+				}
+
+				document.getElementById('result-summary').innerHTML = `
+					<div class="stat"><span class="stat-label">Costo total</span><span class="stat-value">${formatNumber(totalCost)}</span></div>
+					<div class="stat"><span class="stat-label">Asignaciones</span><span class="stat-value">${assigned}</span></div>
+					<div class="stat"><span class="stat-label">Iteraciones</span><span class="stat-value">${steps.length}</span></div>`;
+				const balanceNote = document.getElementById('balance-note');
+				balanceNote.textContent = addedDummy;
+				balanceNote.hidden = !addedDummy;
+				document.getElementById('allocation-container').innerHTML = `
+					<table class="allocations"><thead><tr><th>Ruta</th><th>Unidades</th><th>Costo unitario</th><th>Costo asignado</th></tr></thead>
+					<tbody>${allocationRows.join('')}</tbody></table>`;
+				document.getElementById('steps-list').innerHTML = steps.map(step =>
+					`<li><span class="step-number">${String(step.iteration).padStart(2, '0')}</span><span class="step-description">Penalizacion mayor en ${step.type} ${step.selected} (${formatNumber(step.penalty)}). Asignar ${formatNumber(step.quantity)} unidades de O${step.row + 1} a D${step.column + 1}, con costo ${formatNumber(step.cost)} por unidad.</span></li>`
+				).join('');
+				results.hidden = false;
+				emptyResult.hidden = true;
+			}
+
+			document.querySelectorAll('[data-step]').forEach(button => {
+				button.addEventListener('click', () => {
+					const input = document.getElementById(button.dataset.step);
+					input.value = Number(input.value) + Number(button.dataset.change);
+					updateDimensions();
+				});
+			});
+
+			[originCount, destinationCount].forEach(input => input.addEventListener('change', updateDimensions));
+			document.getElementById('sample-button').addEventListener('click', () => {
+				originCount.value = sample.supply.length;
+				destinationCount.value = sample.demand.length;
+				buildMatrix(sample);
+				clearResults();
+			});
+			document.getElementById('clear-button').addEventListener('click', () => {
+				buildMatrix();
+				clearResults();
+			});
+			document.getElementById('calculate-button').addEventListener('click', () => {
+				const input = readMatrix();
+				const validValues = [...input.costs.flat(), ...input.supply, ...input.demand];
+				if (validValues.some(value => !Number.isFinite(value) || value < 0)) {
+					validationMessage.textContent = 'Completa todos los campos con valores numericos iguales o mayores que cero.';
+					results.hidden = true;
+					emptyResult.hidden = false;
+					return;
+				}
+				validationMessage.textContent = '';
+				showResults(calculateVogel(input));
+			});
+
+			buildMatrix(sample);
+		})();
+	</script>
+</body>
+</html>
